@@ -1,0 +1,39 @@
+1. build in local
+docker build --platform linux/amd64 --build-arg DEPLOY_ENVIRONMENT=dev -f Dockerfile -t 975050010960.dkr.ecr.ap-northeast-2.amazonaws.com/kgm-regular-web-development:latest .
+docker build --platform linux/amd64 --build-arg DEPLOY_ENVIRONMENT=prod -f Dockerfile -t 975050010960.dkr.ecr.ap-northeast-2.amazonaws.com/kgm-regular-web-production:latest .
+
+2. login in local
+aws ecr get-login-password --region ap-northeast-2 --profile kgm | docker login --username AWS --password-stdin 975050010960.dkr.ecr.ap-northeast-2.amazonaws.com
+
+3. push in local
+docker push 975050010960.dkr.ecr.ap-northeast-2.amazonaws.com/kgm-regular-web-development:latest
+docker push 975050010960.dkr.ecr.ap-northeast-2.amazonaws.com/kgm-regular-web-production:latest
+
+4. delete image in local
+docker rmi $(docker images -q)
+
+5-1. connect ec2
+ssh -i "kgm-web-development.pem" ubuntu@ec2-15-164-196-46.ap-northeast-2.compute.amazonaws.com
+ssh -i "kgm-web-production.pem" ubuntu@ec2-15-165-144-112.ap-northeast-2.compute.amazonaws.com
+
+5-2.
+sudo su
+
+6. login in ec2
+aws ecr get-login-password --region ap-northeast-2 | docker login --username AWS --password-stdin 975050010960.dkr.ecr.ap-northeast-2.amazonaws.com
+
+7. pull in ec2
+docker pull 975050010960.dkr.ecr.ap-northeast-2.amazonaws.com/kgm-regular-web-development:latest
+docker pull 975050010960.dkr.ecr.ap-northeast-2.amazonaws.com/kgm-regular-web-production:latest
+
+8. delete container in ec2
+docker rm -f regular-web
+
+9. run in ec2
+docker run -it -d -p 3000:3000 --name regular-web 975050010960.dkr.ecr.ap-northeast-2.amazonaws.com/kgm-regular-web-development:latest
+docker run -it -d -p 3000:3000 --name regular-web 975050010960.dkr.ecr.ap-northeast-2.amazonaws.com/kgm-regular-web-production:latest
+
+10. delete image in ec2
+docker rmi $(docker images -f "dangling=true" -q)
+
+docker logs -f regular-web

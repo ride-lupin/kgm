@@ -1,0 +1,16 @@
+FROM node:18.17.1
+
+ARG DEPLOY_ENVIRONMENT
+
+WORKDIR /app
+COPY . .
+
+RUN yarn set version 4.2.2
+RUN yarn install
+RUN yarn build:${DEPLOY_ENVIRONMENT}
+
+EXPOSE 3000
+
+ENV NODE_ENV ${DEPLOY_ENVIRONMENT}
+
+CMD yarn start
